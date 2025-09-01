@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🎰 SendyGame — Premium</title>
+  <style>
+    :root{
+      --bg-1: #0b0b0d;
+      --card: #0f1720;
+      --gold-1: #ffd54f;
+      --gold-2: #e6b042;
+      --muted: #9aa6b2;
+      --accent: #2dd4bf;
+      --danger: #ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(180deg,#040405 0%, #0b0c0f 100%);
+      color: #fff; font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif; padding:24px;
+    }
+
+    /* Card */
+    .wrap{ width:100%; max-width:560px; background:linear-gradient(180deg,var(--card), #071018); border-radius:14px;
+           box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(230,176,66,0.05) inset; padding:20px; }
+    header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    h1{ font-size:20px; margin:0; color:var(--gold-1); text-shadow:0 2px 10px rgba(230,176,66,0.15); }
+    .sub{ color:var(--muted); font-size:13px; }
+
+    /* Input */
+    .row{ margin-top:12px; display:flex; gap:10px; align-items:center; }
+    input[type="text"]{ flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04);
+                        background: rgba(255,255,255,0.02); color: #fff; outline:none; font-size:14px; }
+    input[type="text"]::placeholder{ color: rgba(255,255,255,0.35); }
+
+    /* Slot */
+    .slot{ display:flex; gap:12px; justify-content:center; margin:18px 0 12px; }
+    .reel{
+      width:90px; height:90px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+      background: linear-gradient(180deg,#071018,#0b1220); border:2px solid rgba(255,213,79,0.12);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 18px rgba(255,213,79,0.03) inset;
+      font-size:40px; transition: transform .12s ease;
+    }
+    .reel.spin{ transform: translateY(-8px) scale(1.03); }
+
+    /* Controls */
+    .controls{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-bottom:10px; }
+    .btn{
+      border: none; padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; color:#071018;
+      background: linear-gradient(90deg,var(--gold-1), var(--gold-2));
+      box-shadow: 0 6px 18px rgba(230,176,66,0.12);
+      transition: transform .08s ease, box-shadow .12s;
+      min-width:140px;
+    }
+    .btn:active{ transform: translateY(2px); }
+    .btn.secondary{ background: linear-gradient(90deg,#6ee7b7,#34d399); color:#062022; }
+    .btn.warn{ background: linear-gradient(90deg,#fbbf24,#f59e0b); color:#071018; }
+    .btn.ghost{ background: transparent; color:var(--gold-1); border:1px solid rgba(255,213,79,0.12); min-width:120px; }
+
+    .status { text-align:center; margin-top:6px; color:var(--muted); font-size:13px; }
+
+    /* Panels */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px; padding:14px; margin-top:12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .card h3{ margin:0 0 8px 0; color:var(--gold-1); font-size:15px; }
+
+    /* Modals / forms */
+    .modal { width:100%; max-width:480px; margin:auto; }
+
+    textarea{ width:100%; min-height:86px; padding:10px 12px; border-radius:10px; resize:vertical; border:1px solid rgba(255,255,255,0.03);
+               background: rgba(255,255,255,0.02); color:#fff; outline:none; font-size:14px; }
+
+    /* small */
+    .muted { color:var(--muted); font-size:13px; }
+    .badge { display:inline-block; padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.03); color:var(--gold-1); font-weight:700; }
+
+    @media(max-width:520px){
+      .reel { width:72px; height:72px; font-size:32px; }
+      .btn { min-width:110px; padding:9px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Zeus Slot">
+    <header>
+      <div>
+        <h1>SendyGame — Premium</h1>
+        <div class="sub">Mainkan, request deposit, ajukan unban jika dibanned (saldo di reset setiap 12 jam)</div>
+      </div>
+      <div class="badge" id="userBadge">Guest</div>
+    </header>
+
+    <div class="row">
+      <input id="username" type="text" placeholder="Masukkan username (tekan Enter untuk load)" />
+    </div>
+
+    <div class="slot" aria-hidden="true">
+      <div class="reel" id="reel1">⚡</div>
+      <div class="reel" id="reel2">🔥</div>
+      <div class="reel" id="reel3">🦅</div>
+    </div>
+
+    <div class="controls">
+      <button id="spinBtn" class="btn">Spin🎲</button>
+      <button id="betBtn" class="btn ghost">Taruhan: <span id="betLabel">100</span> 💰</button>
+      <button id="requestSaldoBtn" class="btn warn">+ Request Deposit</button>
+      <button id="historyBtn" class="btn secondary">📜 Riwayat</button>
+    </div>
+
+    <div class="status">
+      <div>Saldo: <strong id="balance">0</strong> 💰</div>
+      <div id="message" class="muted" aria-live="polite"></div>
+    </div>
+
+    <!-- Deposit card (modal-like) -->
+    <div id="depositCard" class="card hidden">
+      <h3>📥 Ajukan Deposit</h3>
+      <div class="muted">Masukkan nominal minimal <strong>100</strong>. Permintaan akan dikonfirmasi admin.</div>
+      <div style="margin-top:10px;">
+        <input id="depositAmount" type="number" min="100" placeholder="Nominal (100+)" />
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button id="submitDeposit" class="btn">Kirim Permintaan</button>
+        <button id="cancelDeposit" class="btn ghost">Batal</button>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div id="historyCard" class="card hidden">
+      <h3>📜 Riwayat Deposit</h3>
+      <div id="historyContent" class="muted" style="max-height:220px; overflow:auto;"></div>
+      <div style="display:flex; justify-content:flex-end; margin-top:12px;">
+        <button id="closeHistory" class="btn ghost">Tutup</button>
+      </div>
+    </div>
+
+    <!-- Banned / Unban area -->
+    <div id="banZone" class="card hidden" aria-live="polite">
+      <h3>🚫 Akun Diblokir</h3>
+      <div class="muted">Akunmu sedang dibanned oleh admin. Isi formulir di bawah untuk mengajukan pembukaan.</div>
+      <div style="margin-top:10px;">
+        <textarea id="unbanReason" placeholder="Tulis alasan mengapa akunmu harus di-unban (minimal 20 karakter, sertakan permintaan maaf/janji)."></textarea>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;">
+        <button id="sendUnban" class="btn">Kirim Permintaan Unban</button>
+        <button id="closeBanUI" class="btn ghost">Tutup</button>
+      </div>
+      <div id="unbanFeedback" class="muted" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- For debug / info -->
+    <div style="margin-top:14px; display:flex; gap:10px; justify-content:space-between; align-items:center;">
+      <div class="muted">LocalStorage keys: <strong>zeus_users</strong>, <strong>zeus_requests</strong>, <strong>zeus_approved</strong>, <strong>zeus_unban_requests</strong></div>
+      <div style="font-size:12px" class="muted">Theme: <strong>Gold • Dark</strong></div>
+    </div>
+  </div>
+
+<script src="slot.js"></script>
+</body>
+</html>
